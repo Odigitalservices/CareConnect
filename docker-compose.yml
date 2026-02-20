@@ -2,16 +2,22 @@ version: '3.9'
 
 services:
   db:
-    image: postgres:16
+    image: postgres:16-alpine
     container_name: careconnect-db
     environment:
-      POSTGRES_DB: careconnect
-      POSTGRES_USER: careconnect
-      POSTGRES_PASSWORD: careconnect
+      POSTGRES_DB: ${POSTGRES_DB:-careconnect}
+      POSTGRES_USER: ${POSTGRES_USER:-careconnect}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-careconnect_dev}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-careconnect}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   api:
     build:
@@ -21,11 +27,13 @@ services:
     ports:
       - "8080:8080"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/careconnect
-      SPRING_DATASOURCE_USERNAME: careconnect
-      SPRING_DATASOURCE_PASSWORD: careconnect
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-careconnect}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-careconnect}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-careconnect_dev}
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    restart: unless-stopped
 
 volumes:
   postgres_data:
