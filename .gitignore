@@ -1,6 +1,6 @@
 # Java
 backend/target/
-backend/.mvn/
+backend/.mvn/repository/
 *.class
 *.jar
 *.war
