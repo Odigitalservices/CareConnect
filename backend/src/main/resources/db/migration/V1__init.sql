@@ -36,7 +36,8 @@ CREATE TABLE professionals (
     verified        BOOLEAN NOT NULL DEFAULT false,
     city            VARCHAR(100),
     hourly_rate     NUMERIC(10,2),
-    created_at      TIMESTAMPTZ NOT NULL DEFAULT now()
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 -- Availability slots
@@ -45,7 +46,9 @@ CREATE TABLE availability_slots (
     professional_id UUID NOT NULL REFERENCES professionals(id) ON DELETE CASCADE,
     start_time      TIMESTAMPTZ NOT NULL,
     end_time        TIMESTAMPTZ NOT NULL,
-    is_booked       BOOLEAN NOT NULL DEFAULT false
+    is_booked       BOOLEAN NOT NULL DEFAULT false,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 -- Bookings
@@ -69,7 +72,8 @@ CREATE TABLE payments (
     amount      NUMERIC(10,2) NOT NULL,
     status      payment_status NOT NULL DEFAULT 'PENDING',
     gateway_ref VARCHAR(255),
-    created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 -- Reviews
@@ -80,7 +84,8 @@ CREATE TABLE reviews (
     professional_id UUID NOT NULL REFERENCES professionals(id),
     rating          SMALLINT NOT NULL CHECK (rating BETWEEN 1 AND 5),
     comment         TEXT,
-    created_at      TIMESTAMPTZ NOT NULL DEFAULT now()
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 -- Conversations
@@ -89,6 +94,7 @@ CREATE TABLE conversations (
     patient_id      UUID NOT NULL REFERENCES users(id),
     professional_id UUID NOT NULL REFERENCES professionals(id),
     created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
     UNIQUE (patient_id, professional_id)
 );
 
@@ -98,7 +104,9 @@ CREATE TABLE messages (
     conversation_id UUID NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
     sender_id       UUID NOT NULL REFERENCES users(id),
     content         TEXT NOT NULL,
-    sent_at         TIMESTAMPTZ NOT NULL DEFAULT now()
+    sent_at         TIMESTAMPTZ NOT NULL DEFAULT now(),
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 -- Indexes
