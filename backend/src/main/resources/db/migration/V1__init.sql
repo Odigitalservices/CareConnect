@@ -1,5 +1,8 @@
--- Roles enum type
-CREATE TYPE user_role AS ENUM ('PATIENT', 'PROFESSIONAL', 'CLINIC_ADMIN', 'PLATFORM_ADMIN');
+-- Enum types
+CREATE TYPE user_role     AS ENUM ('PATIENT', 'PROFESSIONAL', 'CLINIC_ADMIN', 'PLATFORM_ADMIN');
+CREATE TYPE booking_status AS ENUM ('PENDING', 'CONFIRMED', 'COMPLETED', 'CANCELLED');
+CREATE TYPE payment_status AS ENUM ('PENDING', 'COMPLETED', 'FAILED', 'REFUNDED');
+CREATE TYPE visit_type    AS ENUM ('HOME', 'CLINIC');
 
 -- Users table (shared identity)
 CREATE TABLE users (
@@ -51,8 +54,8 @@ CREATE TABLE bookings (
     patient_id      UUID NOT NULL REFERENCES users(id),
     professional_id UUID NOT NULL REFERENCES professionals(id),
     slot_id         UUID NOT NULL REFERENCES availability_slots(id),
-    status          VARCHAR(50) NOT NULL DEFAULT 'PENDING',
-    visit_type      VARCHAR(20) NOT NULL,
+    status          booking_status NOT NULL DEFAULT 'PENDING',
+    visit_type      visit_type     NOT NULL,
     address         TEXT,
     notes           TEXT,
     created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -64,7 +67,7 @@ CREATE TABLE payments (
     id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     booking_id  UUID NOT NULL REFERENCES bookings(id),
     amount      NUMERIC(10,2) NOT NULL,
-    status      VARCHAR(50) NOT NULL DEFAULT 'PENDING',
+    status      payment_status NOT NULL DEFAULT 'PENDING',
     gateway_ref VARCHAR(255),
     created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
@@ -99,8 +102,11 @@ CREATE TABLE messages (
 );
 
 -- Indexes
-CREATE INDEX idx_professionals_city ON professionals(city);
-CREATE INDEX idx_availability_slots_professional ON availability_slots(professional_id);
-CREATE INDEX idx_bookings_patient ON bookings(patient_id);
-CREATE INDEX idx_bookings_professional ON bookings(professional_id);
-CREATE INDEX idx_messages_conversation ON messages(conversation_id);
+CREATE INDEX idx_refresh_tokens_user        ON refresh_tokens(user_id);
+CREATE INDEX idx_professionals_city         ON professionals(city);
+CREATE INDEX idx_availability_slots_prof    ON availability_slots(professional_id, start_time);
+CREATE INDEX idx_bookings_patient           ON bookings(patient_id);
+CREATE INDEX idx_bookings_professional      ON bookings(professional_id);
+CREATE INDEX idx_bookings_status            ON bookings(status);
+CREATE INDEX idx_messages_conversation      ON messages(conversation_id);
+CREATE INDEX idx_messages_sender            ON messages(sender_id);
