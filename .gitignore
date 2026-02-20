@@ -1,0 +1,32 @@
+# Java
+backend/target/
+backend/.mvn/
+*.class
+*.jar
+*.war
+
+# Flutter
+mobile/.dart_tool/
+mobile/build/
+mobile/.flutter-plugins
+mobile/.flutter-plugins-dependencies
+mobile/pubspec.lock
+
+# Angular
+web-admin/node_modules/
+web-admin/dist/
+web-admin/.angular/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+*.iml
+.vscode/
