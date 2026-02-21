@@ -2,9 +2,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class ApiClient {
-  // Android emulator: 10.0.2.2 maps to host localhost
-  // iOS simulator: localhost works directly
-  static const String _baseUrl = 'http://10.0.2.2:8080';
+  // Web/physical device: use Mac's LAN IP so iPhone can reach the backend
+  static const String _baseUrl = 'http://192.168.1.110:8080';
 
   final Dio _dio;
   final FlutterSecureStorage _storage;
