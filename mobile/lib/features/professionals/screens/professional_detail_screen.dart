@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:careconnect_mobile/features/booking/cubit/booking_cubit.dart';
 import 'package:careconnect_mobile/features/professionals/bloc/professional_detail_cubit.dart';
 import 'package:careconnect_mobile/features/professionals/models/professional_detail.dart';
 
@@ -22,67 +23,81 @@ class _ProfessionalDetailScreenState extends State<ProfessionalDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Professional Profile')),
-      body: BlocBuilder<ProfessionalDetailCubit, ProfessionalDetailState>(
-        builder: (context, state) {
-          if (state is ProfessionalDetailLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (state is ProfessionalDetailError) {
-            return Center(child: Text(state.message));
-          }
-          if (state is ProfessionalDetailLoaded) {
-            final p = state.professional;
-            return SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(p.fullName,
-                      style: Theme.of(context).textTheme.headlineMedium),
-                  const SizedBox(height: 4),
-                  Text(p.specialization,
-                      style: Theme.of(context).textTheme.titleMedium),
-                  if (p.city != null) ...[
+    return BlocListener<BookingCubit, BookingState>(
+      listener: (context, state) {
+        if (state is BookingSuccess) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Booking confirmed!')),
+          );
+        }
+        if (state is BookingError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(state.message)),
+          );
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(title: const Text('Professional Profile')),
+        body: BlocBuilder<ProfessionalDetailCubit, ProfessionalDetailState>(
+          builder: (context, state) {
+            if (state is ProfessionalDetailLoading) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (state is ProfessionalDetailError) {
+              return Center(child: Text(state.message));
+            }
+            if (state is ProfessionalDetailLoaded) {
+              final p = state.professional;
+              return SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(p.fullName,
+                        style: Theme.of(context).textTheme.headlineMedium),
                     const SizedBox(height: 4),
-                    Row(children: [
-                      const Icon(Icons.location_on, size: 16),
-                      const SizedBox(width: 4),
-                      Text(p.city!),
-                    ]),
-                  ],
-                  if (p.hourlyRate != null) ...[
-                    const SizedBox(height: 4),
-                    Text('${p.hourlyRate!.toStringAsFixed(0)} MAD/hour',
-                        style: Theme.of(context).textTheme.bodyLarge),
-                  ],
-                  if (p.bio != null && p.bio!.isNotEmpty) ...[
-                    const SizedBox(height: 16),
-                    Text('About', style: Theme.of(context).textTheme.titleMedium),
+                    Text(p.specialization,
+                        style: Theme.of(context).textTheme.titleMedium),
+                    if (p.city != null) ...[
+                      const SizedBox(height: 4),
+                      Row(children: [
+                        const Icon(Icons.location_on, size: 16),
+                        const SizedBox(width: 4),
+                        Text(p.city!),
+                      ]),
+                    ],
+                    if (p.hourlyRate != null) ...[
+                      const SizedBox(height: 4),
+                      Text('${p.hourlyRate!.toStringAsFixed(0)} MAD/hour',
+                          style: Theme.of(context).textTheme.bodyLarge),
+                    ],
+                    if (p.bio != null && p.bio!.isNotEmpty) ...[
+                      const SizedBox(height: 16),
+                      Text('About', style: Theme.of(context).textTheme.titleMedium),
+                      const SizedBox(height: 8),
+                      Text(p.bio!),
+                    ],
+                    const SizedBox(height: 24),
+                    Text('Available Slots',
+                        style: Theme.of(context).textTheme.titleMedium),
                     const SizedBox(height: 8),
-                    Text(p.bio!),
+                    if (p.availableSlots.isEmpty)
+                      const Text('No available slots at the moment')
+                    else
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: p.availableSlots
+                            .map((slot) => _SlotChip(slot: slot))
+                            .toList(),
+                      ),
                   ],
-                  const SizedBox(height: 24),
-                  Text('Available Slots',
-                      style: Theme.of(context).textTheme.titleMedium),
-                  const SizedBox(height: 8),
-                  if (p.availableSlots.isEmpty)
-                    const Text('No available slots at the moment')
-                  else
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: p.availableSlots
-                          .map((slot) => _SlotChip(slot: slot))
-                          .toList(),
-                    ),
-                ],
-              ),
-            );
-          }
-          return const SizedBox.shrink();
-        },
+                ),
+              );
+            }
+            return const SizedBox.shrink();
+          },
+        ),
       ),
     );
   }
@@ -96,9 +111,42 @@ class _SlotChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final fmt = DateFormat('MMM d, HH:mm');
-    return Chip(
+    return ActionChip(
       label: Text(
         '${fmt.format(slot.startTime.toLocal())} – ${DateFormat('HH:mm').format(slot.endTime.toLocal())}',
+      ),
+      onPressed: () => _showBookingDialog(context),
+    );
+  }
+
+  void _showBookingDialog(BuildContext context) {
+    String selectedVisitType = 'HOME';
+    showDialog(
+      context: context,
+      builder: (_) => StatefulBuilder(
+        builder: (ctx, setState) => AlertDialog(
+          title: const Text('Book Appointment'),
+          content: DropdownButton<String>(
+            value: selectedVisitType,
+            items: ['HOME', 'CLINIC']
+                .map((v) => DropdownMenuItem(value: v, child: Text(v)))
+                .toList(),
+            onChanged: (v) => setState(() => selectedVisitType = v!),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(ctx);
+                context.read<BookingCubit>().book(slot.id, selectedVisitType);
+              },
+              child: const Text('Confirm'),
+            ),
+          ],
+        ),
       ),
     );
   }

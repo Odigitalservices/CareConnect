@@ -34,4 +34,7 @@ class ApiClient {
 
   Future<Response<T>> post<T>(String path, {Object? data}) =>
       _dio.post<T>(path, data: data);
+
+  Future<Response<T>> patch<T>(String path, {Object? data}) =>
+      _dio.patch<T>(path, data: data);
 }
