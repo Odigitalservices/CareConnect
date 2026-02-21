@@ -22,42 +22,69 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('My Bookings')),
-      body: BlocBuilder<BookingCubit, BookingState>(
-        builder: (context, state) {
-          if (state is BookingLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (state is BookingError) {
-            return Center(child: Text(state.message));
-          }
-          if (state is BookingsLoaded) {
-            if (state.bookings.isEmpty) {
-              return const Center(child: Text('No bookings yet'));
-            }
-            return ListView.builder(
-              itemCount: state.bookings.length,
-              itemBuilder: (context, index) {
-                final b = state.bookings[index];
-                return Card(
-                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                  child: ListTile(
-                    title: Text(b.professionalName),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(b.specialization),
-                        Text(DateFormat('MMM d, HH:mm').format(b.slotStart.toLocal())),
-                      ],
-                    ),
-                    trailing: _StatusChip(status: b.status),
-                    isThreeLine: true,
-                  ),
-                );
-              },
+      body: BlocListener<BookingCubit, BookingState>(
+        listener: (context, state) {
+          if (state is BookingSuccess) {
+            // Reload after cancel
+            context.read<BookingCubit>().loadMyBookings();
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Booking cancelled')),
             );
           }
-          return const SizedBox.shrink();
+          if (state is BookingError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.message)),
+            );
+          }
         },
+        child: BlocBuilder<BookingCubit, BookingState>(
+          builder: (context, state) {
+            if (state is BookingLoading) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (state is BookingError) {
+              return Center(child: Text(state.message));
+            }
+            if (state is BookingsLoaded) {
+              if (state.bookings.isEmpty) {
+                return const Center(child: Text('No bookings yet'));
+              }
+              return ListView.builder(
+                itemCount: state.bookings.length,
+                itemBuilder: (context, index) {
+                  final b = state.bookings[index];
+                  return Card(
+                    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    child: ListTile(
+                      title: Text(b.professionalName),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(b.specialization),
+                          Text(DateFormat('MMM d, HH:mm').format(b.slotStart.toLocal())),
+                        ],
+                      ),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _StatusChip(status: b.status),
+                          if (b.status == BookingStatus.PENDING || b.status == BookingStatus.CONFIRMED)
+                            IconButton(
+                              icon: const Icon(Icons.cancel_outlined, color: Colors.red),
+                              tooltip: 'Cancel booking',
+                              onPressed: () => context.read<BookingCubit>().cancel(b.id),
+                            ),
+                        ],
+                      ),
+                      isThreeLine: true,
+                    ),
+                  );
+                },
+              );
+            }
+            return const SizedBox.shrink();
+          },
+        ),
       ),
     );
   }

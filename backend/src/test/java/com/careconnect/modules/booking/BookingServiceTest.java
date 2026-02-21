@@ -85,7 +85,7 @@ class BookingServiceTest {
         var request = new CreateBookingRequest(slotId, VisitType.CLINIC, null, null);
 
         when(userRepository.findByEmail("patient@test.com")).thenReturn(Optional.of(patient));
-        when(slotRepository.findById(slotId)).thenReturn(Optional.of(slot));
+        when(slotRepository.findByIdForUpdate(slotId)).thenReturn(Optional.of(slot));
         when(slotRepository.save(any(AvailabilitySlot.class))).thenAnswer(i -> i.getArgument(0));
         when(bookingRepository.save(any(Booking.class))).thenAnswer(i -> i.getArgument(0));
 
@@ -107,7 +107,7 @@ class BookingServiceTest {
         var request = new CreateBookingRequest(slotId, VisitType.CLINIC, null, null);
 
         when(userRepository.findByEmail("patient@test.com")).thenReturn(Optional.of(patient));
-        when(slotRepository.findById(slotId)).thenReturn(Optional.empty());
+        when(slotRepository.findByIdForUpdate(slotId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.create("patient@test.com", request))
             .isInstanceOf(AppException.class)
@@ -123,7 +123,7 @@ class BookingServiceTest {
         var request = new CreateBookingRequest(slotId, VisitType.CLINIC, null, null);
 
         when(userRepository.findByEmail("patient@test.com")).thenReturn(Optional.of(patient));
-        when(slotRepository.findById(slotId)).thenReturn(Optional.of(slot));
+        when(slotRepository.findByIdForUpdate(slotId)).thenReturn(Optional.of(slot));
 
         assertThatThrownBy(() -> service.create("patient@test.com", request))
             .isInstanceOf(AppException.class)
@@ -139,7 +139,7 @@ class BookingServiceTest {
         var request = new CreateBookingRequest(slotId, VisitType.CLINIC, null, null);
 
         when(userRepository.findByEmail("patient@test.com")).thenReturn(Optional.of(patient));
-        when(slotRepository.findById(slotId)).thenReturn(Optional.of(slot));
+        when(slotRepository.findByIdForUpdate(slotId)).thenReturn(Optional.of(slot));
 
         assertThatThrownBy(() -> service.create("patient@test.com", request))
             .isInstanceOf(AppException.class)

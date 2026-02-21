@@ -28,7 +28,7 @@ public class BookingService {
         var patient = userRepository.findByEmail(patientEmail)
             .orElseThrow(() -> AppException.notFound("User not found"));
 
-        var slot = slotRepository.findById(request.slotId())
+        var slot = slotRepository.findByIdForUpdate(request.slotId())
             .orElseThrow(() -> AppException.notFound("Slot not found"));
 
         if (slot.isBooked()) {

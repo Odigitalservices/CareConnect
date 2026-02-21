@@ -61,4 +61,14 @@ class BookingCubit extends Cubit<BookingState> {
       emit(BookingError(e.toString()));
     }
   }
+
+  Future<void> cancel(String bookingId) async {
+    emit(const BookingLoading());
+    try {
+      final result = await _repository.cancel(bookingId);
+      emit(BookingSuccess(result));
+    } catch (e) {
+      emit(BookingError(e.toString()));
+    }
+  }
 }
