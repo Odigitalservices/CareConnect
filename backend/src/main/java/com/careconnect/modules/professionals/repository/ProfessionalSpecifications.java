@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 public class ProfessionalSpecifications {
     private ProfessionalSpecifications() {}
 
+    // Always restricts to verified=true; omit this spec entirely if you don't want that restriction.
     public static Specification<Professional> isVerified() {
         return (root, query, cb) -> cb.isTrue(root.get("verified"));
     }
@@ -19,7 +20,7 @@ public class ProfessionalSpecifications {
     public static Specification<Professional> hasSpecialization(String spec) {
         return (root, query, cb) ->
             spec == null ? null :
-            cb.like(cb.lower(root.get("specialization")), "%" + spec.toLowerCase() + "%");
+            cb.like(cb.lower(root.get("specialization")), "%" + spec.strip().toLowerCase() + "%");
     }
 
     public static Specification<Professional> hasMinRate(BigDecimal min) {
