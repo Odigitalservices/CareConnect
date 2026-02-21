@@ -1,5 +1,13 @@
 <nav style="background:#1976d2; color:white; padding:12px 24px; display:flex; gap:16px; align-items:center">
   <strong>CareConnect Admin</strong>
-  <a routerLink="/professionals" style="color:white; text-decoration:none">Professionals</a>
+  @if (isLoggedIn) {
+    <a routerLink="/professionals" style="color:white; text-decoration:none">Professionals</a>
+    <span style="flex:1"></span>
+    <button (click)="logout()"
+      style="background:rgba(255,255,255,0.2); color:white; border:1px solid rgba(255,255,255,0.5);
+             padding:6px 16px; border-radius:4px; cursor:pointer; font-size:14px">
+      Logout
+    </button>
+  }
 </nav>
 <router-outlet />

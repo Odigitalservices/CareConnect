@@ -1,5 +1,6 @@
 package com.careconnect.modules.booking;
 
+import com.careconnect.modules.auth.entity.User;
 import com.careconnect.modules.booking.dto.BookingResponse;
 import com.careconnect.modules.booking.dto.CreateBookingRequest;
 import com.careconnect.shared.dto.ApiResponse;
@@ -8,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,24 +23,24 @@ public class BookingController {
 
     @PostMapping
     public ResponseEntity<ApiResponse<BookingResponse>> create(
-            @AuthenticationPrincipal UserDetails userDetails,
+            @AuthenticationPrincipal User user,
             @Valid @RequestBody CreateBookingRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(
-            bookingService.create(userDetails.getUsername(), request)));
+            bookingService.create(user.getEmail(), request)));
     }
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<BookingResponse>>> list(
-            @AuthenticationPrincipal UserDetails userDetails) {
+            @AuthenticationPrincipal User user) {
         return ResponseEntity.ok(ApiResponse.success(
-            bookingService.getMyBookings(userDetails.getUsername())));
+            bookingService.getMyBookings(user.getEmail())));
     }
 
     @PatchMapping("/{id}/cancel")
     public ResponseEntity<ApiResponse<BookingResponse>> cancel(
-            @AuthenticationPrincipal UserDetails userDetails,
+            @AuthenticationPrincipal User user,
             @PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.success(
-            bookingService.cancel(id, userDetails.getUsername())));
+            bookingService.cancel(id, user.getEmail())));
     }
 }
