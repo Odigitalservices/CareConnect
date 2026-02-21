@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:careconnect_mobile/core/api/api_client.dart';
 import 'package:careconnect_mobile/features/auth/screens/login_screen.dart';
+import 'package:careconnect_mobile/features/auth/screens/register_screen.dart';
 import 'package:careconnect_mobile/features/booking/cubit/booking_cubit.dart';
 import 'package:careconnect_mobile/features/booking/data/booking_repository_impl.dart';
 import 'package:careconnect_mobile/features/booking/screens/my_bookings_screen.dart';
@@ -21,6 +22,10 @@ GoRouter buildRouter(ApiClient apiClient) {
       GoRoute(
         path: '/login',
         builder: (context, state) => const LoginScreen(),
+      ),
+      GoRoute(
+        path: '/register',
+        builder: (context, state) => const RegisterScreen(),
       ),
       GoRoute(
         path: '/home',

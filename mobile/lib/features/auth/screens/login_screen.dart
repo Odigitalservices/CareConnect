@@ -72,6 +72,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 24),
                   BlocBuilder<AuthCubit, AuthState>(
+                    buildWhen: (_, s) => s is AuthLoading || s is AuthInitial || s is AuthError,
                     builder: (context, state) {
                       return ElevatedButton(
                         onPressed: state is AuthLoading
@@ -90,6 +91,17 @@ class _LoginScreenState extends State<LoginScreen> {
                             : const Text('Login'),
                       );
                     },
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text("Don't have an account?"),
+                      TextButton(
+                        onPressed: () => context.go('/register'),
+                        child: const Text('Sign up'),
+                      ),
+                    ],
                   ),
                 ],
               ),
