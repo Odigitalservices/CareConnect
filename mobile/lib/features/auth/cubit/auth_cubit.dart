@@ -1,0 +1,44 @@
+import 'package:equatable/equatable.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:careconnect_mobile/core/api/api_client.dart';
+
+// States
+abstract class AuthState extends Equatable {
+  const AuthState();
+  @override
+  List<Object?> get props => [];
+}
+
+class AuthInitial extends AuthState { const AuthInitial(); }
+class AuthLoading extends AuthState { const AuthLoading(); }
+class AuthSuccess extends AuthState { const AuthSuccess(); }
+class AuthError extends AuthState {
+  final String message;
+  const AuthError(this.message);
+  @override
+  List<Object?> get props => [message];
+}
+
+// Cubit
+class AuthCubit extends Cubit<AuthState> {
+  final ApiClient _apiClient;
+  final FlutterSecureStorage _storage;
+
+  AuthCubit(this._apiClient, this._storage) : super(const AuthInitial());
+
+  Future<void> login(String email, String password) async {
+    emit(const AuthLoading());
+    try {
+      final response = await _apiClient.post<Map<String, dynamic>>(
+        '/api/auth/login',
+        data: {'email': email, 'password': password},
+      );
+      final data = (response.data as Map<String, dynamic>)['data'] as Map<String, dynamic>;
+      await _storage.write(key: 'access_token', value: data['accessToken'] as String);
+      emit(const AuthSuccess());
+    } catch (e) {
+      emit(AuthError(e.toString()));
+    }
+  }
+}
