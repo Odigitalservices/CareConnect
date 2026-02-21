@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:careconnect_mobile/core/api/api_client.dart';
 import 'core/router/app_router.dart';
 
 void main() => runApp(const CareConnectApp());
@@ -15,7 +16,7 @@ class CareConnectApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF1976D2)),
         useMaterial3: true,
       ),
-      routerConfig: appRouter,
+      routerConfig: buildRouter(ApiClient()),
     );
   }
 }

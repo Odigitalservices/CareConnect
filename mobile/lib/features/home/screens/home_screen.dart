@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -7,8 +8,11 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Home')),
-      body: const Center(
-        child: Text('Welcome to CareConnect'),
+      body: Center(
+        child: ElevatedButton(
+          onPressed: () => context.push('/professionals'),
+          child: const Text('Find a Professional'),
+        ),
       ),
     );
   }
