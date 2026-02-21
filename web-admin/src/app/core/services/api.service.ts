@@ -20,4 +20,16 @@ export class ApiService {
   post<T>(path: string, body: unknown): Observable<ApiResponse<T>> {
     return this.http.post<ApiResponse<T>>(`${this.baseUrl}${path}`, body);
   }
+
+  put<T>(path: string, body: unknown): Observable<ApiResponse<T>> {
+    return this.http.put<ApiResponse<T>>(`${this.baseUrl}${path}`, body);
+  }
+
+  patch<T>(path: string, body: unknown): Observable<ApiResponse<T>> {
+    return this.http.patch<ApiResponse<T>>(`${this.baseUrl}${path}`, body);
+  }
+
+  delete<T>(path: string): Observable<ApiResponse<T>> {
+    return this.http.delete<ApiResponse<T>>(`${this.baseUrl}${path}`);
+  }
 }
