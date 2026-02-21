@@ -34,6 +34,8 @@ public class ProfessionalsService {
             int page, int size) {
 
         if (size > MAX_PAGE_SIZE) size = MAX_PAGE_SIZE;
+        if (size < 1) size = 1;
+        if (page < 0) throw AppException.badRequest("page must not be negative");
         if (minRate != null && maxRate != null && minRate.compareTo(maxRate) > 0) {
             throw AppException.badRequest("minRate cannot be greater than maxRate");
         }
