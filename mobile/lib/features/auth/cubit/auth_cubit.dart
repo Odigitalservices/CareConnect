@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:careconnect_mobile/core/api/api_client.dart';
+import 'package:careconnect_mobile/core/storage/token_storage.dart';
 
 // States
 abstract class AuthState extends Equatable {
@@ -23,7 +23,7 @@ class AuthError extends AuthState {
 // Cubit
 class AuthCubit extends Cubit<AuthState> {
   final ApiClient _apiClient;
-  final FlutterSecureStorage _storage;
+  final TokenStorage _storage;
 
   AuthCubit(this._apiClient, this._storage) : super(const AuthInitial());
 
@@ -35,7 +35,7 @@ class AuthCubit extends Cubit<AuthState> {
         data: {'email': email, 'password': password},
       );
       final data = (response.data as Map<String, dynamic>)['data'] as Map<String, dynamic>;
-      await _storage.write(key: 'access_token', value: data['accessToken'] as String);
+      await _storage.write(data['accessToken'] as String);
       emit(const AuthSuccess());
     } catch (e) {
       emit(AuthError(e.toString()));

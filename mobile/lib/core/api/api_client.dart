@@ -1,15 +1,15 @@
 import 'package:dio/dio.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:careconnect_mobile/core/storage/token_storage.dart';
 
 class ApiClient {
   // Web/physical device: use Mac's LAN IP so iPhone can reach the backend
-  static const String _baseUrl = 'http://192.168.1.110:8080';
+  static const String _baseUrl = 'http://192.168.1.115:8080';
 
   final Dio _dio;
-  final FlutterSecureStorage _storage;
+  final TokenStorage _storage;
 
-  ApiClient({FlutterSecureStorage? storage})
-      : _storage = storage ?? const FlutterSecureStorage(),
+  ApiClient({TokenStorage? storage})
+      : _storage = storage ?? TokenStorage(),
         _dio = Dio(BaseOptions(
           baseUrl: _baseUrl,
           connectTimeout: const Duration(seconds: 10),
@@ -18,7 +18,7 @@ class ApiClient {
         )) {
     _dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async {
-        final token = await _storage.read(key: 'access_token');
+        final token = await _storage.read();
         if (token != null) {
           options.headers['Authorization'] = 'Bearer $token';
         }

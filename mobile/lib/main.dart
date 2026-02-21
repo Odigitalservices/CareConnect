@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:careconnect_mobile/core/api/api_client.dart';
+import 'package:careconnect_mobile/core/storage/token_storage.dart';
 import 'package:careconnect_mobile/features/auth/cubit/auth_cubit.dart';
 import 'core/router/app_router.dart';
 
@@ -14,7 +14,7 @@ class CareConnectApp extends StatelessWidget {
   Widget build(BuildContext context) {
     final apiClient = ApiClient();
     return BlocProvider<AuthCubit>(
-      create: (_) => AuthCubit(apiClient, const FlutterSecureStorage()),
+      create: (_) => AuthCubit(apiClient, TokenStorage()),
       child: MaterialApp.router(
         title: 'CareConnect',
         debugShowCheckedModeBanner: false,
