@@ -10,6 +10,7 @@ import com.careconnect.shared.dto.PagedResponse;
 import com.careconnect.shared.exception.AppException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,7 +48,8 @@ public class ProfessionalsService {
             .and(ProfessionalSpecifications.hasMinRate(minRate))
             .and(ProfessionalSpecifications.hasMaxRate(maxRate));
 
-        var resultsPage = professionalRepository.findAll(spec, PageRequest.of(page, size));
+        var resultsPage = professionalRepository.findAll(spec,
+            PageRequest.of(page, size, Sort.by("createdAt").descending()));
         return PagedResponse.from(resultsPage.map(this::toSummary));
     }
 
@@ -58,7 +60,7 @@ public class ProfessionalsService {
             .orElseThrow(() -> AppException.notFound("Professional not found"));
 
         var slots = availabilitySlotRepository
-            .findByProfessionalIdAndBookedFalse(id)
+            .findByProfessionalIdAndBookedFalseOrderByStartTimeAsc(id)
             .stream().map(this::toSlotResponse).toList();
 
         return toDetail(professional, slots);
@@ -81,8 +83,6 @@ public class ProfessionalsService {
             p.getId(),
             p.getUser().getFirstName(),
             p.getUser().getLastName(),
-            p.getUser().getEmail(),
-            p.getUser().getPhone(),
             p.getSpecialization(),
             p.getBio(),
             p.getCity(),

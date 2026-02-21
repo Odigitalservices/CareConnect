@@ -117,6 +117,26 @@ class ProfessionalsServiceTest {
         assertThat(result.last()).isTrue();
     }
 
+    @Test
+    void list_rejects_negative_page() {
+        assertThatThrownBy(() ->
+                professionalsService.listProfessionals(null, null, null, null, -1, 20))
+                .isInstanceOf(AppException.class)
+                .satisfies(ex -> assertThat(((AppException) ex).getStatus())
+                        .isEqualTo(HttpStatus.BAD_REQUEST));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void list_clamps_size_below_1_to_1() {
+        when(professionalRepository.findAll(any(Specification.class), pageableCaptor.capture()))
+                .thenReturn(Page.empty());
+
+        professionalsService.listProfessionals(null, null, null, null, 0, 0);
+
+        assertThat(pageableCaptor.getValue().getPageSize()).isEqualTo(1);
+    }
+
     // -----------------------------------------------------------------------
     // getProfessionalById tests
     // -----------------------------------------------------------------------
@@ -125,13 +145,12 @@ class ProfessionalsServiceTest {
     void getById_returns_detail_with_slots() {
         when(professionalRepository.findById(any()))
                 .thenReturn(Optional.of(stubVerifiedProfessional()));
-        when(availabilitySlotRepository.findByProfessionalIdAndBookedFalse(any()))
+        when(availabilitySlotRepository.findByProfessionalIdAndBookedFalseOrderByStartTimeAsc(any()))
                 .thenReturn(List.of(stubSlot(), stubSlot()));
 
         var result = professionalsService.getProfessionalById(UUID.randomUUID());
 
         assertThat(result.availableSlots()).hasSize(2);
-        assertThat(result.email()).isEqualTo("doc@test.com");
         assertThat(result.specialization()).isEqualTo("Physiotherapy");
     }
 
@@ -169,7 +188,7 @@ class ProfessionalsServiceTest {
     void getById_returns_empty_slots_when_none_available() {
         when(professionalRepository.findById(any()))
                 .thenReturn(Optional.of(stubVerifiedProfessional()));
-        when(availabilitySlotRepository.findByProfessionalIdAndBookedFalse(any()))
+        when(availabilitySlotRepository.findByProfessionalIdAndBookedFalseOrderByStartTimeAsc(any()))
                 .thenReturn(List.of());
 
         var result = professionalsService.getProfessionalById(UUID.randomUUID());

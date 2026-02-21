@@ -13,14 +13,22 @@ public class ProfessionalSpecifications {
     }
 
     public static Specification<Professional> hasCity(String city) {
-        return (root, query, cb) ->
-            city == null ? null : cb.equal(root.get("city"), city);
+        return (root, query, cb) -> {
+            if (city == null) return null;
+            // NOTE: case-insensitive match; add a functional index on lower(city) in production for performance
+            return cb.equal(cb.lower(root.get("city")), city.strip().toLowerCase());
+        };
     }
 
     public static Specification<Professional> hasSpecialization(String spec) {
-        return (root, query, cb) ->
-            spec == null ? null :
-            cb.like(cb.lower(root.get("specialization")), "%" + spec.strip().toLowerCase() + "%");
+        return (root, query, cb) -> {
+            if (spec == null) return null;
+            String escaped = spec.strip().toLowerCase()
+                .replace("\\", "\\\\")
+                .replace("%", "\\%")
+                .replace("_", "\\_");
+            return cb.like(cb.lower(root.get("specialization")), "%" + escaped + "%", '\\');
+        };
     }
 
     public static Specification<Professional> hasMinRate(BigDecimal min) {

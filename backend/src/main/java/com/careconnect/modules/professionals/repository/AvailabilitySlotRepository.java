@@ -6,5 +6,5 @@ import java.util.List;
 import java.util.UUID;
 
 public interface AvailabilitySlotRepository extends JpaRepository<AvailabilitySlot, UUID> {
-    List<AvailabilitySlot> findByProfessionalIdAndBookedFalse(UUID professionalId);
+    List<AvailabilitySlot> findByProfessionalIdAndBookedFalseOrderByStartTimeAsc(UUID professionalId);
 }
